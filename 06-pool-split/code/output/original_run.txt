@@ -1,0 +1,267 @@
+============================= test session starts =============================
+platform win32 -- Python 3.13.14, pytest-9.2.0, pluggy-1.7.0 -- C:\Users\LENOVO\OneDrive\桌面\面试\五维\.venv\Scripts\python.exe
+cachedir: .pytest_cache
+rootdir: C:\Users\LENOVO\OneDrive\桌面\面试\五维\06-pool-split\code
+plugins: anyio-4.16.0
+collecting ... collected 21 items
+
+test_pool_split.py::TestReportedFailures::test_docstring_example_underpays_by_one_cent FAILED [  4%]
+test_pool_split.py::TestReportedFailures::test_six_equal_users_overpay_by_two_cents FAILED [  9%]
+test_pool_split.py::TestReportedFailures::test_one_cent_three_users FAILED [ 14%]
+test_pool_split.py::TestSumAlwaysEqualsPool::test_exhaustive_small_domain FAILED [ 19%]
+test_pool_split.py::TestSumAlwaysEqualsPool::test_exhaustive_four_users FAILED [ 23%]
+test_pool_split.py::TestSumAlwaysEqualsPool::test_randomized_many_users FAILED [ 28%]
+test_pool_split.py::TestSumAlwaysEqualsPool::test_huge_pool_beyond_float_precision FAILED [ 33%]
+test_pool_split.py::TestFairness::test_each_share_is_floor_or_floor_plus_one PASSED [ 38%]
+test_pool_split.py::TestFairness::test_heavier_weight_never_gets_less_than_lighter_by_more_than_one PASSED [ 42%]
+test_pool_split.py::TestFairness::test_deterministic PASSED              [ 47%]
+test_pool_split.py::TestEdgeCases::test_single_recipient_gets_everything PASSED [ 52%]
+test_pool_split.py::TestEdgeCases::test_more_users_than_cents FAILED     [ 57%]
+test_pool_split.py::TestEdgeCases::test_zero_weight_user_gets_nothing PASSED [ 61%]
+test_pool_split.py::TestEdgeCases::test_zero_pool_returns_zeros PASSED   [ 66%]
+test_pool_split.py::TestEdgeCases::test_all_zero_weights_and_zero_pool FAILED [ 71%]
+test_pool_split.py::TestEdgeCases::test_all_zero_weights_falls_back_to_equal_split FAILED [ 76%]
+test_pool_split.py::TestEdgeCases::test_empty_weights_with_zero_pool PASSED [ 80%]
+test_pool_split.py::TestEdgeCases::test_empty_weights_with_pool_is_rejected FAILED [ 85%]
+test_pool_split.py::TestEdgeCases::test_negative_pool_is_rejected FAILED [ 90%]
+test_pool_split.py::TestEdgeCases::test_negative_weight_is_rejected FAILED [ 95%]
+test_pool_split.py::TestEdgeCases::test_does_not_mutate_input PASSED     [100%]
+
+================================== FAILURES ===================================
+______ TestReportedFailures.test_docstring_example_underpays_by_one_cent ______
+
+self = <test_pool_split.TestReportedFailures object at 0x000002140156D590>
+
+    def test_docstring_example_underpays_by_one_cent(self):
+        """题目自带的例子：10000 分 3 人等分，原实现返回 [3333]*3 = 9999，少发 1 分。"""
+        result = split_pool(10000, [1, 1, 1])
+>       assert sum(result) == 10000, f"sum={sum(result)} != 10000 (result={result})"
+E       AssertionError: sum=9999 != 10000 (result=[3333, 3333, 3333])
+E       assert 9999 == 10000
+E        +  where 9999 = sum([3333, 3333, 3333])
+
+test_pool_split.py:43: AssertionError
+_______ TestReportedFailures.test_six_equal_users_overpay_by_two_cents ________
+
+self = <test_pool_split.TestReportedFailures object at 0x000002140156EC10>
+
+    def test_six_equal_users_overpay_by_two_cents(self):
+        """100 分 6 人等分：每人向上舍入到 17，合计 102，平台多发 2 分。"""
+        result = split_pool(100, [1] * 6)
+>       assert sum(result) == 100, f"sum={sum(result)} != 100 (result={result})"
+E       AssertionError: sum=102 != 100 (result=[17, 17, 17, 17, 17, 17])
+E       assert 102 == 100
+E        +  where 102 = sum([17, 17, 17, 17, 17, 17])
+
+test_pool_split.py:48: AssertionError
+_______________ TestReportedFailures.test_one_cent_three_users ________________
+
+self = <test_pool_split.TestReportedFailures object at 0x0000021401520E90>
+
+    def test_one_cent_three_users(self):
+        """1 分钱分给 3 个人：round(0.33)=0，三个人都是 0，1 分钱凭空消失。"""
+        result = split_pool(1, [1, 1, 1])
+>       assert sum(result) == 1, f"sum={sum(result)} != 1 (result={result})"
+E       AssertionError: sum=0 != 1 (result=[0, 0, 0])
+E       assert 0 == 1
+E        +  where 0 = sum([0, 0, 0])
+
+test_pool_split.py:53: AssertionError
+____________ TestSumAlwaysEqualsPool.test_exhaustive_small_domain _____________
+
+self = <test_pool_split.TestSumAlwaysEqualsPool object at 0x000002140156EAD0>
+
+    def test_exhaustive_small_domain(self):
+        """穷举：池子 0..120 分 × 3 人权重 0..4 的全部组合，共 121 × 125 = 15125 组。
+    
+        比手写若干样例更容易发现「某些余数组合」才出问题的情况。
+        """
+        cases = 0
+        for pool in range(0, 121):
+            for weights in itertools.product(range(0, 5), repeat=3):
+>               result = split_pool(pool, list(weights))
+                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+test_pool_split.py:68: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+pool_cents = 0, weights = [0, 0, 0]
+
+    def split_pool(pool_cents: int, weights: list[int]) -> list[int]:
+        """把 pool_cents 按 weights 的比例分给每个人，返回每人拿到多少分。
+    
+        返回列表与 weights 一一对应。
+        """
+        total = sum(weights)
+>       return [round(pool_cents * w / total) for w in weights]
+                      ^^^^^^^^^^^^^^^^^^^^^^
+E       ZeroDivisionError: division by zero
+
+pool_split_original.py:18: ZeroDivisionError
+_____________ TestSumAlwaysEqualsPool.test_exhaustive_four_users ______________
+
+self = <test_pool_split.TestSumAlwaysEqualsPool object at 0x000002140156ED50>
+
+    def test_exhaustive_four_users(self):
+        """4 人，权重 0..3，池子 0..60：覆盖「零头要分给 2~3 个人」的情况。"""
+        for pool in range(0, 61):
+            for weights in itertools.product(range(0, 4), repeat=4):
+>               result = split_pool(pool, list(weights))
+                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+test_pool_split.py:77: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+pool_cents = 0, weights = [0, 0, 0, 0]
+
+    def split_pool(pool_cents: int, weights: list[int]) -> list[int]:
+        """把 pool_cents 按 weights 的比例分给每个人，返回每人拿到多少分。
+    
+        返回列表与 weights 一一对应。
+        """
+        total = sum(weights)
+>       return [round(pool_cents * w / total) for w in weights]
+                      ^^^^^^^^^^^^^^^^^^^^^^
+E       ZeroDivisionError: division by zero
+
+pool_split_original.py:18: ZeroDivisionError
+_____________ TestSumAlwaysEqualsPool.test_randomized_many_users ______________
+
+self = <test_pool_split.TestSumAlwaysEqualsPool object at 0x00000214015210F0>
+
+    def test_randomized_many_users(self):
+        """随机大范围：池子最大 10^7 分，人数最多 50，权重最多 10^5。固定种子可复现。"""
+        rng = random.Random(20261110)
+        for _ in range(500):
+            n = rng.randint(1, 50)
+            pool = rng.randint(0, 10_000_000)
+            weights = [rng.randint(0, 100_000) for _ in range(n)]
+            if sum(weights) == 0:
+                weights[0] = 1
+            result = split_pool(pool, weights)
+>           assert sum(result) == pool, f"pool={pool} n={n} -> {sum(result)}"
+E           AssertionError: pool=2920890 n=20 -> 2920888
+E           assert 2920888 == 2920890
+E            +  where 2920888 = sum([176175, 223305, 225294, 146599, 226286, 205706, ...])
+
+test_pool_split.py:90: AssertionError
+________ TestSumAlwaysEqualsPool.test_huge_pool_beyond_float_precision ________
+
+self = <test_pool_split.TestSumAlwaysEqualsPool object at 0x0000021401521220>
+
+    def test_huge_pool_beyond_float_precision(self):
+        """10^18 级别的金额：float 只有 53 位有效位，原实现会从这里开始丢分。"""
+        pool = 10**18 + 7
+        weights = [3, 5, 7, 11]
+        result = split_pool(pool, weights)
+>       assert sum(result) == pool
+E       assert 1000000000000000032 == 1000000000000000007
+E        +  where 1000000000000000032 = sum([115384615384615392, 192307692307692320, 269230769230769248, 423076923076923072])
+
+test_pool_split.py:99: AssertionError
+__________________ TestEdgeCases.test_more_users_than_cents ___________________
+
+self = <test_pool_split.TestEdgeCases object at 0x000002140156F110>
+
+    def test_more_users_than_cents(self):
+        """1000 人分 3 分钱：恰好 3 人各拿 1 分，其余为 0，总额仍然精确。"""
+        result = split_pool(3, [1] * 1000)
+>       assert sum(result) == 3
+E       assert 0 == 3
+E        +  where 0 = sum([0, 0, 0, 0, 0, 0, ...])
+
+test_pool_split.py:152: AssertionError
+______________ TestEdgeCases.test_all_zero_weights_and_zero_pool ______________
+
+self = <test_pool_split.TestEdgeCases object at 0x00000214015A4950>
+
+    def test_all_zero_weights_and_zero_pool(self):
+>       assert split_pool(0, [0, 0, 0]) == [0, 0, 0]
+               ^^^^^^^^^^^^^^^^^^^^^^^^
+
+test_pool_split.py:165: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+pool_cents = 0, weights = [0, 0, 0]
+
+    def split_pool(pool_cents: int, weights: list[int]) -> list[int]:
+        """把 pool_cents 按 weights 的比例分给每个人，返回每人拿到多少分。
+    
+        返回列表与 weights 一一对应。
+        """
+        total = sum(weights)
+>       return [round(pool_cents * w / total) for w in weights]
+                      ^^^^^^^^^^^^^^^^^^^^^^
+E       ZeroDivisionError: division by zero
+
+pool_split_original.py:18: ZeroDivisionError
+________ TestEdgeCases.test_all_zero_weights_falls_back_to_equal_split ________
+
+self = <test_pool_split.TestEdgeCases object at 0x0000021401529480>
+
+    def test_all_zero_weights_falls_back_to_equal_split(self):
+        """没人有合格时长但池子里有钱：平分兜底，总额依然精确，绝不少发。"""
+>       result = split_pool(100, [0, 0, 0])
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+test_pool_split.py:169: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+pool_cents = 100, weights = [0, 0, 0]
+
+    def split_pool(pool_cents: int, weights: list[int]) -> list[int]:
+        """把 pool_cents 按 weights 的比例分给每个人，返回每人拿到多少分。
+    
+        返回列表与 weights 一一对应。
+        """
+        total = sum(weights)
+>       return [round(pool_cents * w / total) for w in weights]
+                      ^^^^^^^^^^^^^^^^^^^^^^
+E       ZeroDivisionError: division by zero
+
+pool_split_original.py:18: ZeroDivisionError
+___________ TestEdgeCases.test_empty_weights_with_pool_is_rejected ____________
+
+self = <test_pool_split.TestEdgeCases object at 0x00000214014F8B50>
+
+    def test_empty_weights_with_pool_is_rejected(self):
+>       with pytest.raises(ValueError):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE ValueError
+
+test_pool_split.py:177: Failed
+________________ TestEdgeCases.test_negative_pool_is_rejected _________________
+
+self = <test_pool_split.TestEdgeCases object at 0x00000214014F8850>
+
+    def test_negative_pool_is_rejected(self):
+>       with pytest.raises(ValueError):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE ValueError
+
+test_pool_split.py:181: Failed
+_______________ TestEdgeCases.test_negative_weight_is_rejected ________________
+
+self = <test_pool_split.TestEdgeCases object at 0x0000021401525310>
+
+    def test_negative_weight_is_rejected(self):
+>       with pytest.raises(ValueError):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE ValueError
+
+test_pool_split.py:185: Failed
+=========================== short test summary info ===========================
+FAILED test_pool_split.py::TestReportedFailures::test_docstring_example_underpays_by_one_cent
+FAILED test_pool_split.py::TestReportedFailures::test_six_equal_users_overpay_by_two_cents
+FAILED test_pool_split.py::TestReportedFailures::test_one_cent_three_users - ...
+FAILED test_pool_split.py::TestSumAlwaysEqualsPool::test_exhaustive_small_domain
+FAILED test_pool_split.py::TestSumAlwaysEqualsPool::test_exhaustive_four_users
+FAILED test_pool_split.py::TestSumAlwaysEqualsPool::test_randomized_many_users
+FAILED test_pool_split.py::TestSumAlwaysEqualsPool::test_huge_pool_beyond_float_precision
+FAILED test_pool_split.py::TestEdgeCases::test_more_users_than_cents - assert...
+FAILED test_pool_split.py::TestEdgeCases::test_all_zero_weights_and_zero_pool
+FAILED test_pool_split.py::TestEdgeCases::test_all_zero_weights_falls_back_to_equal_split
+FAILED test_pool_split.py::TestEdgeCases::test_empty_weights_with_pool_is_rejected
+FAILED test_pool_split.py::TestEdgeCases::test_negative_pool_is_rejected - Fa...
+FAILED test_pool_split.py::TestEdgeCases::test_negative_weight_is_rejected - ...
+======================== 13 failed, 8 passed in 0.26s =========================

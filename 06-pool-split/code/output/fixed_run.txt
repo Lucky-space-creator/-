@@ -1,0 +1,30 @@
+============================= test session starts =============================
+platform win32 -- Python 3.13.14, pytest-9.2.0, pluggy-1.7.0 -- C:\Users\LENOVO\OneDrive\桌面\面试\五维\.venv\Scripts\python.exe
+cachedir: .pytest_cache
+rootdir: C:\Users\LENOVO\OneDrive\桌面\面试\五维\06-pool-split\code
+plugins: anyio-4.16.0
+collecting ... collected 21 items
+
+test_pool_split.py::TestReportedFailures::test_docstring_example_underpays_by_one_cent PASSED [  4%]
+test_pool_split.py::TestReportedFailures::test_six_equal_users_overpay_by_two_cents PASSED [  9%]
+test_pool_split.py::TestReportedFailures::test_one_cent_three_users PASSED [ 14%]
+test_pool_split.py::TestSumAlwaysEqualsPool::test_exhaustive_small_domain PASSED [ 19%]
+test_pool_split.py::TestSumAlwaysEqualsPool::test_exhaustive_four_users PASSED [ 23%]
+test_pool_split.py::TestSumAlwaysEqualsPool::test_randomized_many_users PASSED [ 28%]
+test_pool_split.py::TestSumAlwaysEqualsPool::test_huge_pool_beyond_float_precision PASSED [ 33%]
+test_pool_split.py::TestFairness::test_each_share_is_floor_or_floor_plus_one PASSED [ 38%]
+test_pool_split.py::TestFairness::test_heavier_weight_never_gets_less_than_lighter_by_more_than_one PASSED [ 42%]
+test_pool_split.py::TestFairness::test_deterministic PASSED              [ 47%]
+test_pool_split.py::TestEdgeCases::test_single_recipient_gets_everything PASSED [ 52%]
+test_pool_split.py::TestEdgeCases::test_more_users_than_cents PASSED     [ 57%]
+test_pool_split.py::TestEdgeCases::test_zero_weight_user_gets_nothing PASSED [ 61%]
+test_pool_split.py::TestEdgeCases::test_zero_pool_returns_zeros PASSED   [ 66%]
+test_pool_split.py::TestEdgeCases::test_all_zero_weights_and_zero_pool PASSED [ 71%]
+test_pool_split.py::TestEdgeCases::test_all_zero_weights_falls_back_to_equal_split PASSED [ 76%]
+test_pool_split.py::TestEdgeCases::test_empty_weights_with_zero_pool PASSED [ 80%]
+test_pool_split.py::TestEdgeCases::test_empty_weights_with_pool_is_rejected PASSED [ 85%]
+test_pool_split.py::TestEdgeCases::test_negative_pool_is_rejected PASSED [ 90%]
+test_pool_split.py::TestEdgeCases::test_negative_weight_is_rejected PASSED [ 95%]
+test_pool_split.py::TestEdgeCases::test_does_not_mutate_input PASSED     [100%]
+
+============================= 21 passed in 0.18s ==============================

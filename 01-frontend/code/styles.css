@@ -1,0 +1,475 @@
+/* ==========================================================================
+   "Finish! Upload Your Resume" — pixel pass against the Figma frame.
+
+   Layout mirrors the reference: copy at the top of the left column, illustration
+   bleeding off the bottom edge, upload card on the right. Collapses to one column
+   under 900px.
+
+   Colours were sampled from the design: primary #2360FF, secondary #7FB0F8,
+   dropzone fill #F2FAFF, stepper line #C9D8FF.
+   ========================================================================== */
+
+:root {
+  --blue-700: #1b4fd8;
+  --blue-600: #2360ff;   /* Finish button, cloud icon */
+  --blue-500: #3f74ff;
+  --blue-300: #7fb0f8;   /* Last step button */
+  --blue-150: #c9d8ff;   /* stepper line */
+  --blue-100: #e8f1ff;
+  --blue-050: #f2faff;   /* dropzone fill */
+
+  --ink-900: #1d2433;
+  --ink-700: #3d4657;
+  --ink-500: #8e939b;    /* paragraph */
+  --ink-300: #a3a8b0;    /* dropzone hint */
+
+  --line-300: #7fa6f0;   /* dashed dropzone border */
+  --line-200: #eef1f5;
+
+  --danger: #d92d20;
+
+  --surface: #ffffff;
+
+  --shadow-card: 0 1px 2px rgba(22, 34, 61, 0.03), 0 12px 34px rgba(22, 34, 61, 0.075);
+
+  --font: "Inter", "Segoe UI", -apple-system, BlinkMacSystemFont, "Helvetica Neue",
+          "PingFang SC", "Microsoft YaHei", sans-serif;
+
+  --ease: cubic-bezier(0.22, 0.61, 0.36, 1);
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  font-family: var(--font);
+  color: var(--ink-900);
+  background: var(--surface);
+  -webkit-font-smoothing: antialiased;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* --------------------------------------------------------------------------
+   Stage & two-column grid
+   -------------------------------------------------------------------------- */
+.stage {
+  min-height: 100%;
+  display: grid;
+  place-items: center;
+  padding: 48px 32px;
+}
+
+.step {
+  width: min(980px, 100%);
+  display: grid;
+  /* Fixed left column + fluid card: the card lands at h/w ≈ 0.88, like the reference. */
+  grid-template-columns: 300px 1fr;
+  gap: 96px;
+  align-items: stretch;
+}
+
+/* --------------------------------------------------------------------------
+   Left column
+   -------------------------------------------------------------------------- */
+.step__intro {
+  display: flex;
+  flex-direction: column;
+}
+
+.intro__title {
+  margin: 0;
+  font-size: 30px;
+  line-height: 1.2;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: var(--ink-900);
+}
+
+.intro__subtitle {
+  margin: 0;
+  font-size: 26px;
+  line-height: 1.3;
+  font-weight: 400;
+  letter-spacing: -0.01em;
+  color: var(--ink-900);
+}
+
+.intro__hint {
+  margin: 16px 0 0;
+  max-width: 34ch;
+  font-size: 13px;
+  line-height: 1.65;
+  color: var(--ink-500);
+}
+
+.intro__art {
+  /* Sits flush with the bottom of the column; the artwork itself is drawn past its
+     viewBox so the cat bleeds off the edge like the reference. */
+  margin-top: auto;
+  padding-top: 28px;
+}
+
+.intro__art img {
+  display: block;
+  /* Slightly wider than the text column, like the reference (the art starts left of the copy). */
+  width: 130%;
+  margin-left: -15%;
+  height: auto;
+}
+
+/* --------------------------------------------------------------------------
+   Upload card
+   -------------------------------------------------------------------------- */
+.upload-card {
+  background: var(--surface);
+  border-radius: 18px;
+  box-shadow: var(--shadow-card);
+  padding: 28px 28px 20px;
+  display: flex;
+  flex-direction: column;
+}
+
+.upload-card__title {
+  margin: 0 0 22px;
+  font-size: 20px;
+  line-height: 1.3;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: var(--ink-900);
+}
+
+#upload-form {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+/* Dropzone ---------------------------------------------------------------- */
+.dropzone {
+  position: relative;
+  flex: 1;
+  min-height: 300px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  padding: 28px 24px;
+  border: 1.5px dashed var(--line-300);
+  border-radius: 4px;
+  background: var(--blue-050);
+  text-align: center;
+  cursor: pointer;
+  transition: border-color 0.18s var(--ease), background-color 0.18s var(--ease),
+              box-shadow 0.18s var(--ease);
+}
+
+.dropzone:hover {
+  border-color: var(--blue-600);
+  background: #ecf6ff;
+}
+
+.dropzone:focus-visible {
+  outline: none;
+  border-color: var(--blue-600);
+  box-shadow: 0 0 0 4px rgba(35, 96, 255, 0.16);
+}
+
+.dropzone.is-dragover {
+  border-color: var(--blue-600);
+  background: var(--blue-100);
+}
+
+.dropzone.has-file {
+  border-style: solid;
+  border-color: #b9cffb;
+  background: var(--blue-100);
+}
+
+.dropzone__icon {
+  width: 30px;
+  height: 30px;
+  color: var(--blue-600);
+  flex: none;
+}
+
+.dropzone__hint {
+  margin: 0;
+  max-width: 300px;
+  font-size: 11.5px;
+  line-height: 1.85;
+  color: var(--ink-300);
+}
+
+.dropzone__file {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  max-width: 100%;
+}
+
+.dropzone__file-name {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--ink-900);
+  overflow-wrap: anywhere;
+}
+
+.dropzone__file-size {
+  font-size: 12px;
+  color: var(--ink-500);
+}
+
+.dropzone.is-invalid {
+  border-color: var(--danger);
+  background: #fff6f5;
+}
+
+.form__error {
+  margin: 10px 0 0;
+  font-size: 12.5px;
+  line-height: 1.5;
+  color: var(--danger);
+}
+
+/* Buttons ----------------------------------------------------------------- */
+.actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+  margin-top: 40px;
+}
+
+.btn {
+  appearance: none;
+  border: 0;
+  border-radius: 6px;
+  height: 42px;
+  padding: 0 18px;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 500;
+  letter-spacing: 0.01em;
+  color: #ffffff;
+  cursor: pointer;
+  transition: background-color 0.16s var(--ease), box-shadow 0.16s var(--ease),
+              transform 0.06s var(--ease);
+}
+
+.btn:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 4px rgba(35, 96, 255, 0.2);
+}
+
+.btn:active {
+  transform: translateY(1px);
+}
+
+.btn--primary {
+  background: var(--blue-600);
+}
+
+.btn--primary:hover {
+  background: var(--blue-700);
+}
+
+.btn--secondary {
+  background: var(--blue-300);
+}
+
+.btn--secondary:hover {
+  background: #6ea4f4;
+}
+
+/* Stepper ----------------------------------------------------------------- */
+.stepper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 56px;
+  margin: 36px 0 4px;
+  padding: 0;
+  list-style: none;
+}
+
+/* The track runs past the outer dots, as in the design. */
+.stepper::before {
+  content: "";
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 200px;
+  height: 2px;
+  background: var(--blue-150);
+}
+
+.step-dot {
+  position: relative;
+  z-index: 1;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--blue-500);
+  display: grid;
+  place-items: center;
+}
+
+.step-dot svg {
+  width: 11px;
+  height: 11px;
+  fill: none;
+  stroke: #ffffff;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+/* --------------------------------------------------------------------------
+   Toast
+   -------------------------------------------------------------------------- */
+.toast {
+  position: fixed;
+  left: 50%;
+  bottom: 28px;
+  transform: translate(-50%, 12px);
+  background: var(--ink-900);
+  color: #fff;
+  font-size: 13.5px;
+  padding: 10px 16px;
+  border-radius: 999px;
+  box-shadow: 0 8px 24px rgba(22, 34, 61, 0.24);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s var(--ease), transform 0.2s var(--ease);
+}
+
+.toast.is-visible {
+  opacity: 1;
+  transform: translate(-50%, 0);
+}
+
+.toast.is-success {
+  background: #0b7a4b;
+}
+
+/* --------------------------------------------------------------------------
+   Responsive — the grid becomes a single column, art moves under the card
+   -------------------------------------------------------------------------- */
+@media (max-width: 1024px) {
+  .step {
+    grid-template-columns: 30% 1fr;
+    gap: 6%;
+  }
+}
+
+@media (max-width: 900px) {
+  .stage {
+    padding: 28px 20px 40px;
+    align-items: start;
+  }
+
+  .step {
+    grid-template-columns: 1fr;
+    gap: 24px;
+  }
+
+  .step__intro {
+    overflow: visible;
+    order: 1;
+  }
+
+  .upload-card {
+    order: 2;
+    padding: 22px 18px 16px;
+  }
+
+  .intro__title {
+    font-size: 26px;
+  }
+
+  .intro__subtitle {
+    font-size: 20px;
+  }
+
+  .intro__hint {
+    max-width: 46ch;
+    font-size: 12.5px;
+  }
+
+  .intro__art img {
+    width: 100%;
+    margin-left: 0;
+  }
+
+  .intro__art {
+    margin: 14px auto 0;
+    max-width: 240px;
+    padding-top: 0;
+    /* No page edge to crop against on small screens, so fade the bleed out instead. */
+    -webkit-mask-image: linear-gradient(to bottom, #000 86%, transparent 100%);
+    mask-image: linear-gradient(to bottom, #000 86%, transparent 100%);
+  }
+
+  .dropzone {
+    min-height: 180px;
+  }
+
+  .actions {
+    gap: 12px;
+    margin-top: 24px;
+  }
+
+  .stepper {
+    gap: 48px;
+    margin-top: 26px;
+  }
+
+  .stepper::before {
+    width: 132px;
+  }
+}
+
+@media (max-width: 420px) {
+  .actions {
+    grid-template-columns: 1fr;
+  }
+
+  .btn--primary {
+    order: -1;
+  }
+
+  .intro__art {
+    max-width: 190px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+  }
+}

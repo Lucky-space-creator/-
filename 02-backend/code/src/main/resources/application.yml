@@ -1,0 +1,23 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: security-helloworld
+
+app:
+  jwt:
+    # Demo only. In production this must come from an environment variable / secret manager.
+    # HS256 requires a key of at least 256 bits (32 bytes).
+    secret: ${APP_JWT_SECRET:change-me-please-this-is-a-32-byte-demo-secret}
+    expiration-minutes: 60
+  demo:
+    user:
+      # Credentials required by the assignment: test / 123456
+      username: test
+      password: "123456"
+      roles: USER
+
+logging:
+  level:
+    org.springframework.security: INFO
