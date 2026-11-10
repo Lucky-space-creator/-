@@ -1,23 +1,23 @@
-# Back-end Task — Spring Boot 3.2.0 + Spring Security: protected `HelloWorld` + login API
+# 后端题 —— Spring Boot 3.2.0 + Spring Security：受保护的 `HelloWorld` 与登录接口
 
-**Stack:** Java 17 · Spring Boot 3.2.0 · Spring Security 6.2 · JJWT 0.12.3 · Maven
-**Code:** `code/` (run `mvn spring-boot:run`, default port 8080)
+**技术栈：** Java 17 · Spring Boot 3.2.0 · Spring Security 6.2 · JJWT 0.12.3 · Maven
+**代码：** `code/`（`mvn spring-boot:run` 启动，默认端口 8080）
 
 ---
 
-## 1. Deliverable in one table
+## 1. 一表对照交付要求
 
-| Requirement | Implementation |
+| 题目要求 | 实现 |
 |---|---|
 | Spring Boot **3.2.0** | `pom.xml` → parent `spring-boot-starter-parent:3.2.0` |
-| `GET` HelloWorld API returning `"Hello World"` | `GET /api/hello`, `HelloController.hello()` |
-| …that **requires SpringSecurity authentication** | `anyRequest().authenticated()` + JWT filter; unauthenticated call returns **401** |
-| Username-password login API | `POST /api/auth/login`, credentials `test` / `123456` |
-| Bonus: it actually works end-to-end | 5 integration tests (`mvn test`) + real `curl` transcript below |
+| `GET` 接口返回 `"Hello World"` | `GET /api/hello`，`HelloController.hello()` |
+| ……且**必须经过 SpringSecurity 认证** | `anyRequest().authenticated()` + JWT 过滤器；未认证调用返回 **401** |
+| 用户名密码登录接口 | `POST /api/auth/login`，账号 `test` / `123456` |
+| 加分：端到端真的能跑 | 5 个集成测试（`mvn test`）+ 下方真实的 `curl` 输出 |
 
-## 2. API contract
+## 2. 接口契约
 
-### `POST /api/auth/login` — public
+### `POST /api/auth/login` —— 公开
 
 ```bash
 curl -X POST http://localhost:8080/api/auth/login \
@@ -34,9 +34,9 @@ curl -X POST http://localhost:8080/api/auth/login \
 }
 ```
 
-Wrong credentials → `401 {"status":401,"message":"Invalid username or password",...}`
+账号或密码错误 → `401 {"status":401,"message":"Invalid username or password",...}`
 
-### `GET /api/hello` — requires a Bearer token
+### `GET /api/hello` —— 需要 Bearer Token
 
 ```bash
 curl -i http://localhost:8080/api/hello \
@@ -50,61 +50,59 @@ Content-Type: text/plain;charset=UTF-8
 Hello World
 ```
 
-Without the header:
+不带请求头时：
 
 ```
 HTTP/1.1 401
 {"status":401,"message":"Authentication required: send 'Authorization: Bearer <token>'"}
 ```
 
-### `GET /api/me` — extra, proves the SecurityContext is populated
+### `GET /api/me` —— 额外接口，用来证明 SecurityContext 真的被填进去了
 
 ```json
 {"username":"test","authenticated":true,"authorities":["ROLE_USER"]}
 ```
 
-## 3. Design decisions (and why)
+## 3. 设计取舍（以及为什么）
 
-**JWT, not session.** The API is stateless: `SessionCreationPolicy.STATELESS`, CSRF and form-login
-disabled, `Authorization: Bearer` as the only credential carrier. A session cookie version would
-need CSRF tokens (because the browser sends cookies automatically) and sticky sessions or a Redis
-session store behind a load balancer — cost with no benefit for a two-endpoint API.
+**用 JWT，不用 session。** 这套 API 是无状态的：`SessionCreationPolicy.STATELESS`，
+CSRF 和 form-login 全部关闭，`Authorization: Bearer` 是唯一的凭证载体。如果换成 session cookie，
+就必须处理 CSRF token（因为浏览器会自动带上 cookie），并且在负载均衡后面还需要粘性会话或
+Redis 会话存储 —— 对一个只有两个接口的服务来说，这是纯成本、没有收益。
 
-**Filter chain order.** `JwtAuthenticationFilter` is registered *before*
-`UsernamePasswordAuthenticationFilter`. It never throws: an invalid token just leaves the request
-anonymous, and `anyRequest().authenticated()` then rejects it. Putting the decision in one place
-means a new endpoint is protected by default — a new `permitAll()` line is an explicit, reviewable
-act.
+**过滤器链顺序。** `JwtAuthenticationFilter` 注册在 `UsernamePasswordAuthenticationFilter`
+**之前**。这个过滤器从不抛异常：token 非法就保持匿名，随后由 `anyRequest().authenticated()`
+统一拒绝。把「要不要放行」集中在一处，意味着**新增接口默认是受保护的** —— 想开放某个路径，
+必须显式写一行 `permitAll()`，这是一次看得见、可评审的动作。
 
-**Password storage.** `BCryptPasswordEncoder`, and the demo password is hashed at startup — never
-compared as plain text, and never logged. Roles come from `app.demo.user.roles`.
+**密码存储。** 用 `BCryptPasswordEncoder`，演示账号的密码在启动时哈希 —— 从不做明文比对，
+也从不打印到日志。角色来自 `app.demo.user.roles` 配置。
 
-**Errors as JSON.** A stateless API must not return the default HTML error page, so there is an
-`AuthenticationEntryPoint` for 401 and a `@RestControllerAdvice` for `AuthenticationException` /
-validation failures. Outcome: every failure mode has a stable shape for the client.
+**错误也返回 JSON。** 无状态 API 不能返回默认的 HTML 错误页，所以配了
+`AuthenticationEntryPoint` 负责 401，配了 `@RestControllerAdvice` 处理 `AuthenticationException`
+和参数校验失败。结果是：每一种失败形态对客户端来说都是稳定的结构。
 
-**Config over hard-coding.** Credentials and the signing secret live in `application.yml` and can
-be overridden by `APP_JWT_SECRET`; `JwtService` refuses to start if the secret is shorter than 32
-bytes (HS256 requirement) instead of silently generating weak signatures.
+**配置优先于硬编码。** 账号和签名密钥放在 `application.yml`，可用 `APP_JWT_SECRET` 覆盖；
+`JwtService` 在密钥短于 32 字节时**直接启动失败**（HS256 的硬性要求），而不是悄悄签出弱签名。
 
-## 4. What the tests cover (`mvn test`)
+## 4. 测试覆盖（`mvn test`）
 
 ```
 Tests run: 5, Failures: 0, Errors: 0, Skipped: 0
 ```
 
-| Test | Assertion |
+| 测试 | 断言 |
 |---|---|
-| `helloWithoutTokenIsRejected` | 401 + JSON body |
-| `loginReturnsToken` | 200, `tokenType=Bearer`, non-empty token |
-| `loginThenCallProtectedApi` | login → `Bearer` → `200 "Hello World"` → `/api/me` shows `test` |
+| `helloWithoutTokenIsRejected` | 401 + JSON 响应体 |
+| `loginReturnsToken` | 200、`tokenType=Bearer`、token 非空 |
+| `loginThenCallProtectedApi` | 登录 → 带 Bearer → `200 "Hello World"` → `/api/me` 返回 `test` |
 | `wrongPasswordIsRejected` | 401 |
-| `tamperedTokenIsRejected` | 401 (`Bearer not-a-real-jwt`) |
+| `tamperedTokenIsRejected` | 401（`Bearer not-a-real-jwt`） |
 
-Tests run against the real filter chain (`@SpringBootTest` + `MockMvc`), so they fail if someone
-accidentally opens up `/api/hello`.
+测试跑在真实的过滤器链上（`@SpringBootTest` + `MockMvc`），所以一旦有人不小心把
+`/api/hello` 放开，测试会立刻失败。
 
-## 5. Project layout
+## 5. 工程结构
 
 ```
 code/
@@ -121,12 +119,12 @@ code/
     └── test/java/.../SecurityIntegrationTest.java
 ```
 
-## 6. Not production-ready, and why (deliberate scope)
+## 6. 距离生产还差什么（刻意的范围控制）
 
-| Gap | Consequence | Fix |
+| 缺口 | 后果 | 补法 |
 |---|---|---|
-| Single in-memory user | no registration, no persistence | `UserDetailsService` backed by a `users` table |
-| No refresh token | re-login after 60 min | add `/api/auth/refresh` + rotating refresh token |
-| No revocation list | a stolen token is valid until expiry | short TTL + `jti` blacklist in Redis |
-| No rate limiting | login endpoint is brute-forceable | Bucket4j / gateway rate limit + lockout |
-| Secret from env with a default | the default is public | fail fast when `APP_JWT_SECRET` is absent in a non-dev profile |
+| 内存里只有一个用户 | 没有注册、没有持久化 | 用 `users` 表实现 `UserDetailsService` |
+| 没有 refresh token | 60 分钟后必须重新登录 | 增加 `/api/auth/refresh` + 轮换式 refresh token |
+| 没有吊销名单 | 被盗的 token 在过期前一直有效 | 缩短 TTL + Redis 里维护 `jti` 黑名单 |
+| 没有限流 | 登录接口可被暴力破解 | Bucket4j / 网关限流 + 失败锁定 |
+| 密钥有默认值 | 默认值是公开的 | 非 dev profile 下缺少 `APP_JWT_SECRET` 时直接启动失败 |
